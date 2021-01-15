@@ -111,7 +111,6 @@
     - name: reboot system
       reboot:
         reboot_timeout: 3600
-        test_command: 
 
     - name: gather facts
       gather_facts:
