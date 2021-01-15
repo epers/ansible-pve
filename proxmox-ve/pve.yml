@@ -26,13 +26,13 @@
       - wget
       - bridge-utils
       - ifupdown2
-      
+
 - name: install proxmox-ve
   apt:
     name: proxmox-ve
     state: present
     install_recommends: yes
-    
+
 - name: remove proxmox enterprise repo
   apt_repository:
     repo: deb https://enterprise.proxmox.com/debian/pve buster pve-enterprise

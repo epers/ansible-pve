@@ -1,0 +1,25 @@
+---
+- name: gather facts
+  gather_facts:
+    parallel: yes
+
+- name: create ansible group
+  group:
+    name: ansible
+
+- name: create ansible user
+  user:
+    name: ansible
+    group: ansible
+
+- name: Set authorized key taken from file
+  ansible.posix.authorized_key:
+    user: ansible
+    state: present
+    key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDf6D7wvhtJtK9cJ3ruMBaiKsrjtziFzMtGV5QE2+FMz1ySkWsAG04Uu2ynDIOlcUT/+PhYMf4FNhmgTM0hLnpUG6Cz0gZ11bEsUTO4nJjk5mhTD6lrPJgYT6022hhnGh6rg/RNTwBrNxvN9qvs/ARX20fnZhZvU2im3A0/0nLf01BctqU/R8X2m+caZ7k1K+NqXOvofVRBBZEYWdE2scuQWOW1JAhG+GO3JUAlfPhAdT69qa6B4LFAu62FnWyssZMYIP3oSz2G+T5qjZDmFpb9Tgj/JkCaRaU8jtuxZjdEwi3HW1+bfvveoLmMNL7uk1pkOJ6iXAjlXZYHgXOHZcM5 epers@ansible-control"
+
+- name: set passwordless sudo for ansible user
+  lineinfile:
+      path: "/etc/sudoers.d/ansible"
+      line: "ansible ALL=(ALL) NOPASSWD: ALL"
+      create: yes

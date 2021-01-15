@@ -1,0 +1,60 @@
+---
+
+- name: install proxmox ve
+  hosts: all
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Switch to user user
+      set_fact:
+        ansible_ssh_user: user
+        ansible_ssh_pass: "live"
+        ansible_sudo_pass: "live"
+        ansible_user: user
+
+    - name: gather facts
+      gather_facts:
+        parallel: yes
+
+    - name: Run presetup
+      include: misc/live-presetup.yml
+
+    - name: Switch to ansible user
+      set_fact:
+        ansible_ssh_user: ansible
+        ansible_ssh_pass: ""
+        ansible_sudo_pass: ""
+        ansible_user: ansible
+
+    - name: gather facts
+      gather_facts:
+        parallel: yes
+
+    - name: bootstrap
+      include: bootstrap/bootstrap.yml
+
+    - name: reboot system
+      reboot:
+        reboot_timeout: 3600
+
+    - name: Switch to ansible user
+      set_fact:
+        ansible_ssh_user: ansible
+        ansible_ssh_pass: ""
+        ansible_sudo_pass: ""
+        ansible_user: ansible
+
+    - name: gather facts
+      gather_facts:
+        parallel: yes
+
+    - name: Setup nullmailer
+      include: misc/nullmailer.yml
+
+    - name: Install Proxmox VE
+      include: proxmox-ve/pve.yml
+
+    - name: reboot system
+      reboot:
+        reboot_timeout: 3600
