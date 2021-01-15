@@ -1,0 +1,63 @@
+---
+
+- name: install podman
+  hosts: all
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: update apt cache
+      apt:
+        update_cache: yes
+
+    - name: install packages
+      apt:
+        name: 
+          - dirmngr
+          - curl
+          - python3
+          - python3-pip
+          - python3-setuptools
+          - python-setuptools
+        state: present
+        install_recommends: yes
+
+    - name: add buster-backports repo
+      apt_repository:
+        repo: deb http://deb.debian.org/debian/ buster-backports main contrib non-free
+        state: present
+    
+    - name: add podman repo key
+      apt_key:
+        url: https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key
+        state: present
+    
+    - name: add podman repo
+      apt_repository:
+        repo: deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /
+        state: present
+
+    - name: install libseccomp2 from backports
+      apt:
+        name: libseccomp2
+        state: latest
+        default_release: buster-backports
+    
+    - name: install packages
+      apt:
+        name: 
+          - podman
+        state: present
+        install_recommends: yes
+
+    - name: install podman-compose
+      pip:
+        name: podman-compose
+        executable: pip3
+
+    - name: enable user namespaces
+      ansible.posix.sysctl:
+        name: kernel.unprivileged_userns_clone
+        value: 1
+        state: present
+        reload: yes

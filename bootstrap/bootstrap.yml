@@ -1,0 +1,74 @@
+---
+
+- name: playbook_bootstrap
+  hosts: all
+  become: yes
+  gather_facts: yes
+  user: user
+
+  roles:
+    - role: 'nilsmeyer.debootstrap'
+  vars:
+    - release: buster
+    - use_tmpfs: no
+    - use_efi: yes
+    - wipe: "ABSOLUTELY"
+    - root_password: $6$5Sd0RWZsnD$UJchUZEEwX070YDAgJlfnwhq8cKdbVIn.XQxsaNia5PFFlMG5O556GiWPCKKoMqZzHZJSWUw3V2wrhROdL0ie0
+
+    - install_packages: []
+
+    - dbstrp_user:
+        name: ansible
+        dbstrp_ssh_keys: ["ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDf6D7wvhtJtK9cJ3ruMBaiKsrjtziFzMtGV5QE2+FMz1ySkWsAG04Uu2ynDIOlcUT/+PhYMf4FNhmgTM0hLnpUG6Cz0gZ11bEsUTO4nJjk5mhTD6lrPJgYT6022hhnGh6rg/RNTwBrNxvN9qvs/ARX20fnZhZvU2im3A0/0nLf01BctqU/R8X2m+caZ7k1K+NqXOvofVRBBZEYWdE2scuQWOW1JAhG+GO3JUAlfPhAdT69qa6B4LFAu62FnWyssZMYIP3oSz2G+T5qjZDmFpb9Tgj/JkCaRaU8jtuxZjdEwi3HW1+bfvveoLmMNL7uk1pkOJ6iXAjlXZYHgXOHZcM5"]
+
+    - layout:
+      - device: "/dev/sda"
+        wipe: "ABSOLUTELY"
+        partitions:
+          - num: 1
+            size: 512M
+            type: ef00
+            fs: vfat
+            mount: /boot/efi
+          - num: 3
+            size: 2G
+            type: 8300
+            fs: ext4
+            mount: /boot
+          - num: 4
+            type: 8300
+            fs: ext4
+            mount: /
+
+  tasks:
+    - name: configure_network
+      blockinfile:
+        path: /mnt/bootstrap/etc/network/interfaces
+        owner: root
+        group: root
+        mode: '0644'
+        block: |
+          auto eth0
+          iface eth0 inet static
+            address 192.168.155.32
+            gateway 192.168.155.1
+
+    - name: configure hostname in hosts file
+      lineinfile:
+        path: /mnt/bootstrap/etc/hosts
+        regexp: '^127\.0\.0\.1'
+        line: "{{ ansible_eth0.ipv4.address }} localhost {{ hostname }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: configure hostname in /etc/hostname
+      lineinfile:
+        path: /mnt/bootstrap/etc/hostname
+        regexp: ".*"
+        line: "{{ hostname }}"
+        owner: root
+        group: root
+        mode: '0644'
+
+

@@ -1,0 +1,26 @@
+---
+- name: apt update
+  apt:
+    update_cache: yes
+
+- name: install misc packages
+  apt:
+    name:
+      - nullmailer
+      - mailutils
+
+- name: create /etc/nullmailer/remotes
+  replace:
+    path: /etc/nullmailer/remotes
+    regexp: '.*'
+    replace: "smtp.{{ fqdn }}"
+
+- name: create /etc/nullmailer/defaultdomain
+  lineinfile:
+    path: /etc/nullmailer/defaultdomain
+    line: "{{ fqdn }}"
+    
+- name: create /etc/nullmailer/adminaddr
+  lineinfile:
+    path: /etc/nullmailer/adminaddr
+    line: it-sysadm@ansencorp.com

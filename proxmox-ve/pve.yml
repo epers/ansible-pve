@@ -1,0 +1,39 @@
+---
+- name: remove proxmox enterprise repo
+  apt_repository:
+    repo: deb https://enterprise.proxmox.com/debian/pve buster pve-enterprise
+    state: absent
+
+- name: add proxmox repo key
+  apt_key:
+    url: http://download.proxmox.com/debian/proxmox-ve-release-6.x.gpg
+    state: present
+
+- name: add proxmox repo
+  apt_repository:
+    repo: deb http://download.proxmox.com/debian/pve buster pve-no-subscription
+    state: present
+
+- name: apt dist-upgrade
+  apt:
+    update_cache: yes
+    upgrade: dist
+
+- name: install misc packages
+  apt:
+    name:
+      - curl
+      - wget
+      - bridge-utils
+      - ifupdown2
+      
+- name: install proxmox-ve
+  apt:
+    name: proxmox-ve
+    state: present
+    install_recommends: yes
+    
+- name: remove proxmox enterprise repo
+  apt_repository:
+    repo: deb https://enterprise.proxmox.com/debian/pve buster pve-enterprise
+    state: absent
